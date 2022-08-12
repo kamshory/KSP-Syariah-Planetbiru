@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mobile KSPS Planetbiru</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-	<script src="assets/js/jsQR.js"></script>
+    <link rel="stylesheet" href="./assets/css/style.css">
+	<script src="./assets/js/jsQR.js"></script>
 </head>
 <body>
 	<div class="page">
@@ -19,7 +19,7 @@
 		</div>
 		
 		<div class="button-wrapper">
-			<button class="btn btn-primary btn-block" type="button" onclick="window.location='index.html'">KEMBALI</button>
+			<button class="btn btn-primary btn-block" type="button" onclick="window.location='./index.html'">KEMBALI</button>
 		</div>
 		<div id="status"></div>
 		<div id="loadingMessage" hidden="">⌛ Loading video...</div>
@@ -40,21 +40,6 @@
 			canvas.stroke();
 		}
 
-		function setDataToDevice(key, data) 
-		{
-			if(typeof Android !== "undefined" && Android !== null) 
-			{
-				Android.setDataToDevice(key, data);
-			} 
-		}
-		function getDataFromDevice(key) 
-		{
-			if(typeof Android !== "undefined" && Android !== null) 
-			{
-				return Android.getDataFromDevice(key);
-			} 
-			return null;
-		}
 		navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function (stream) {
 			video.srcObject = stream;
 			video.setAttribute("playsinline", true); 
@@ -62,10 +47,9 @@
 			requestAnimationFrame(tick);
 		});
 
-		console.log('DATA TO DEVICE');
-		setDataToDevice('A', 'COBA SAJA YA'); 
-		console.log('DATA FROM DEVICE', getDataFromDevice('A'));
-
+		
+		var lastTime = 0;
+		var threshold = 30;
 		function tick() {
 			loadingMessage.innerText = "⌛ Loading video..."
 			if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -90,12 +74,22 @@
 					drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
 					
 					console.log(code.data);			
-
+					var url = Android.setEncryptedDataToDevice(code.data);
+					if(url.indexOf("://") !== -1)
+					{
+						window.location.href = url;
+					}
 				}
 				else {
 				}
 			}
-			requestAnimationFrame(tick);
+			var tm = (new Date()).getTime();
+			if((tm - lastTime) > threshold)
+			{
+				requestAnimationFrame(tick);
+				lastTime = tm;
+			}
+			
 		}
 		function parseTLV(data, tg, len, base) {
 			var start = 0;
@@ -127,11 +121,6 @@
 			}
 			return result;
 		}
-		var data = {
-			SC:"https",
-			SN:"ksps-trial.planetbiru.com",
-			SP:"443"
-		};
 	</script>
 </body>
 </html>

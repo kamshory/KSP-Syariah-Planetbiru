@@ -161,7 +161,7 @@ public class PlanetWebClient extends WebViewClient {
         SharedPreferences prefs = this.context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE);
 
         prefs.edit().putString(ConstantString.LAST_URL_TO_BE_LOADED, url).apply();
-        if(connectionType < 1 && !url.equals(Config.getReloadURL()) && !url.equals(Config.getErrorPageURL()))
+        if(connectionType < 1 && !url.contains(Config.getReloadURL()) && !url.contains(Config.getErrorPageURL()))
         {
             view.loadUrl(Config.getReloadURL(), requestHeaders);
         }
@@ -238,7 +238,7 @@ public class PlanetWebClient extends WebViewClient {
         int connectionType = NetworkUtility.getCachedConnectivityStatus();
         requestHeaders.put(ConstantString.X_CONNECTION_TYPE, NetworkUtility.getConnectionName(connectionType));
         String format = Config.getErrorPageMessageFormat();
-        String message = String.format(format, uri.toString());
+        String message = String.format(format, "aplikasi");
         Toast.makeText(this.context, message, Toast.LENGTH_LONG).show();
         view.loadUrl(Config.getErrorPageURL(), requestHeaders);
         super.onReceivedError(view, request, error);
@@ -253,7 +253,7 @@ public class PlanetWebClient extends WebViewClient {
         int connectionType = NetworkUtility.getCachedConnectivityStatus();
         requestHeaders.put(ConstantString.X_CONNECTION_TYPE, NetworkUtility.getConnectionName(connectionType));
         String format = Config.getErrorPageMessageFormat();
-        String message = String.format(format, uri.toString());
+        String message = String.format(format, "aplikasi");
         Toast.makeText(this.context, message, Toast.LENGTH_LONG).show();
         view.loadUrl(Config.getErrorPageURL(), requestHeaders);
         super.onReceivedHttpError(view, request, errorResponse);

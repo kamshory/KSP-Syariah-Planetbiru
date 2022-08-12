@@ -1,11 +1,15 @@
 package com.example.planetbiru.utility;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class TLVUtils {
+
+    private static final String TAG = "TLVUtils";
 
     /**
      * Convert a hexadecimal string to a list of TLV objects
@@ -16,20 +20,26 @@ public class TLVUtils {
         List<TLV> tlvs = new ArrayList<TLV>();
 
         int position = 0;
-        while (position != hexString.length()) {
-            String _hexTag = getTag(hexString, position);
-            position += _hexTag.length();
+        String sub = hexString;
+        while (position < hexString.length() - 3) {
 
-            LPositon l_position = getLengthAndPosition(hexString, position);
-            int _vl = l_position.get_vL();
-
-            position = l_position.get_position();
-
-            String _value = hexString.substring(position, position + _vl * 2);
-
-            position = position + _value.length();
-
-            tlvs.add(new TLV(_hexTag, _vl, _value));
+            try {
+                sub = hexString.substring(position, position+4);
+                String tag = sub.substring(0, 2);
+                String len = sub.substring(2, 4);
+                int length = Integer.parseInt(len.toLowerCase());
+                String value = hexString.substring(position + 4, position + 4 + length);
+                Log.d(TAG, sub);
+                Log.d(TAG, tag);
+                Log.d(TAG, len);
+                Log.d(TAG, value);
+                tlvs.add(new TLV(tag, length, value));
+                position += (length + 4);
+            }
+            catch (NumberFormatException e)
+            {
+                break;
+            }
         }
         return tlvs;
     }
@@ -45,64 +55,9 @@ public class TLVUtils {
 
         int position = 0;
         while (position != hexString.length()) {
-            String _hexTag = getTag(hexString, position);
 
-            position += _hexTag.length();
-
-            LPositon l_position = getLengthAndPosition(hexString, position);
-
-            int _vl = l_position.get_vL();
-            position = l_position.get_position();
-            String _value = hexString.substring(position, position + _vl * 2);
-            position = position + _value.length();
-
-            tlvs.put(_hexTag, new TLV(_hexTag, _vl, _value));
         }
         return tlvs;
     }
 
-    /**
-     * Return the length of the last Value
-     *
-     * @param hexString
-     * @param position
-     * @return
-     */
-    private static LPositon getLengthAndPosition(String hexString, int position) {
-        String firstByteString = hexString.substring(position, position + 2);
-        int i = Integer.parseInt(firstByteString, 16);
-        String hexLength = "";
-
-        if (((i >>> 7) & 1) == 0) {
-            hexLength = hexString.substring(position, position + 2);
-            position = position + 2;
-        } else {
-            //When the leftmost bit is 1, get the last 7 bits.
-            int _L_Len = i & 127;
-            position = position + 2;
-            hexLength = hexString.substring(position, position + _L_Len * 2);
-            //position represents the first byte, followed by how many bytes to represent the subsequent Value
-            position = position + _L_Len * 2;
-        }
-        return new LPositon(Integer.parseInt(hexLength, 16), position);
-
-    }
-
-    /**
-     * Get subdomain Tag Tags
-     *
-     * @param hexString
-     * @param position
-     * @return
-     */
-    private static String getTag(String hexString, int position) {
-        String firstByte = hexString.substring(position, position + 2);
-        int i = Integer.parseInt(firstByte, 16);
-        if ((i & 0x1f) == 0x1f) {
-            return hexString.substring(position, position + 4);
-
-        } else {
-            return hexString.substring(position, position + 2);
-        }
-    }
 }

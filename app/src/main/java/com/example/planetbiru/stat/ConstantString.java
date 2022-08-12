@@ -31,4 +31,6 @@ public class ConstantString {
     public static final String X_CONNECTION_TYPE = "X-Connection-Type";
     public static final String RECEIVE_NOTIFICATION = "RECEIVE_NOTIFICATION";
     public static final String X_APPLICATION_VERSION = "X-Application-Version";
+    public static final String HOME_URL = "HOME_URL";
+    public static final String INTERNAL_HOST = "INTERNAL_HOST";
 }

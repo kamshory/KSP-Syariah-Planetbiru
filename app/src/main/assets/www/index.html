@@ -6,14 +6,21 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mobile KSPS Planetbiru</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script type="text/javascript">
+        function activation()
+        {
+            Android.clearPreferences();
+            window.location = './activation.html';
+        }
+    </script>
 </head>
 <body>
     <div class="page">
         <div class="logo">
-            <img src="assets/images/logi-koperasi.png" alt="">
+            <img src="./assets/images/logo-koperasi.png" alt="">
         </div>
         <div class="button-wrapper">
-            <button class="button activate" onclick="window.location='activation.html'">AKTIVASI</button>
+            <button class="button activate" onclick="activation()">AKTIVASI</button>
         </div>
     </div>
 </body>

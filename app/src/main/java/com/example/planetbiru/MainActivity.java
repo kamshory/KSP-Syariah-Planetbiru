@@ -160,6 +160,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE);
+        String internalHost = prefs.getString(ConstantString.INTERNAL_HOST, "");
+        Config.setInternalHosts(internalHost);
+
+        String homeURL = prefs.getString(ConstantString.HOME_URL, "");
+        if(homeURL.contains("://"))
+        {
+            Config.setHomeURL(homeURL);
+        }
+
+
         /*
          * Hide title bar
          */
@@ -239,11 +250,12 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setDatabaseEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             webView.getSettings().setDatabasePath(new StringBuilder().append(this.getFilesDir()).append("/").append(webView.getContext().getPackageName()).append("/databases/").toString());
         }
 
-        webView.addJavascriptInterface(new WebAppInterface(getApplicationContext()), "Android");
+        webView.addJavascriptInterface(new WebAppInterface(getApplicationContext(), this.webView, this), "Android");
 
         /*
          * Set webChrome client
@@ -466,22 +478,26 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        SharedPreferences prefs = this.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE);
         String savedURL = prefs.getString(ConstantString.LAST_URL_LOADED, null);
+        Log.d(TAG, "savedURL : "+savedURL);
         if (savedURL == null) {
             savedURL = "";
         }
-        if(savedURL.startsWith("http"))
+        Log.d(TAG, "savedURL : "+savedURL);
+        if(!savedURL.startsWith("http"))
         {
             savedURL = "";
         }
+        Log.d(TAG, "savedURL : "+savedURL);
         if (savedURL.equals("")) {
             savedURL = Config.getHomeURL();
         }
+        Log.d(TAG, "savedURL : "+savedURL);
         //savedURL= "";
         String url = this.getIntent().getStringExtra("url");
+        Log.d(TAG, "url : "+url);
 
-        if(url == null) {
+        if(url == null || !url.contains("http") || !url.contains(":/")) {
             url = "";
         }
         Log.d(TAG, url);
@@ -525,6 +541,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    public void windowLocation(String url)
+    {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put(ConstantString.X_APPLICATION_NAME, Config.getApplicationName());
+        int connectionType = NetworkUtility.getCachedConnectivityStatus();
+        requestHeaders.put(ConstantString.X_CONNECTION_TYPE, NetworkUtility.getConnectionName(connectionType));
+        webView.loadUrl(url, requestHeaders);
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {

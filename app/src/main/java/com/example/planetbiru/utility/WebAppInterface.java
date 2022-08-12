@@ -6,10 +6,12 @@ import android.icu.util.Calendar;
 import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
+import com.example.planetbiru.MainActivity;
 import com.example.planetbiru.SMSCache;
 import com.example.planetbiru.config.Config;
 import com.example.planetbiru.stat.ConstantString;
@@ -17,25 +19,50 @@ import com.example.planetbiru.stat.ConstantString;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
 public class WebAppInterface {
     private static final String TAG = "WebAppInterface";
+    private final WebView webView;
+    private final MainActivity activity;
     private Context context;
 
     /** Instantiate the interface and set the context */
-    public WebAppInterface(Context context) {
+    public WebAppInterface(Context context, WebView webView, MainActivity activity) {
         this.context = context;
+        this.webView = webView;
+        this.activity = activity;
     }
 
     @JavascriptInterface
-    public boolean setEncryptedDataToDevice(String key, String encryptedData)
+    public boolean clearPreferences()
+    {
+        context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).edit().remove(ConstantString.LAST_URL_LOADED);
+        return true;
+    }
+
+    @JavascriptInterface
+    public String getHomeURL()
+    {
+        return context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).getString(ConstantString.HOME_URL, "");
+    }
+
+    @JavascriptInterface
+    public String getLastURLLoaded()
+    {
+        return context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).getString(ConstantString.LAST_URL_LOADED, "");
+    }
+
+    @JavascriptInterface
+    public String setEncryptedDataToDevice(String encryptedData)
     {
         AESUtil util = new AESUtil();
-        String decryptedData = util.decrypt(Config.getEncryptionKey(), encryptedData);
+        String key = Config.getEncryptionKey();
 
+        String decryptedData = util.decrypt(key, encryptedData);
         List<TLV> list = TLVUtils.builderTlvList(decryptedData);
         for(int i = 0; i<list.size(); i++)
         {
@@ -43,9 +70,39 @@ public class WebAppInterface {
             String value = list.get(i).getValue();
             context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).edit().putString(tag, value).apply();
         }
+        String url = "";
+        for(int i = 0; i<list.size(); i++) {
+            String tag = list.get(i).getTag();
+            String value = list.get(i).getValue();
+            if(tag.equals("RL") && value.contains("://"))
+            {
+                url = value;
+            }
+        }
 
+        // Set Home URL
+        if(url.contains("://"))
+        {
+            context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).edit().putString(ConstantString.HOME_URL, url).apply();
+        }
 
-        return true;
+        try
+        {
+            URL urlObj = new URL(url);
+            String domain = urlObj.getHost();
+            if(domain.contains(":"))
+            {
+                String arr[] = domain.split("\\:", 2);
+                domain = arr[0];
+            }
+            context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).edit().putString(ConstantString.INTERNAL_HOST, domain).apply();
+            Config.setInternalHosts(domain);
+        }
+        catch (Exception e)
+        {
+
+        }
+        return url;
     }
 
     private Map<String, TLV> parseTLV(String decryptedData) {

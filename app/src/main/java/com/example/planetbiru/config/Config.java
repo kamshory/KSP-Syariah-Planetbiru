@@ -34,7 +34,7 @@ public class Config {
     private static boolean allowTakeImage                 = true;
     private static boolean askPermissionGetLocation       = false;
     private static boolean rememberPermissionGetLocation  = false;
-    private static String encryptionKey                   = "64783Yg76t7ryuuguygtftyf";
+    private static String encryptionKey                   = "BDE540BD7E96ECAB33D0216EF003F53C";
 
     public static String getApplicationName() {
         return applicationName;
