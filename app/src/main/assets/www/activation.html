@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile KSPS Planetbiru</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+	<script src="assets/js/jsQR.js"></script>
+</head>
+<body>
+	<div class="page">
+		<div class="canvas-wrapper">
+			<div class="top-left"></div>
+			<div class="top-right"></div>
+			<canvas id="canvas" height="280" width="280"></canvas>
+			<div class="bottom-left"></div>
+			<div class="bottom-right"></div>
+		</div>
+		
+		<div class="button-wrapper">
+			<button class="btn btn-primary btn-block" type="button" onclick="window.location='index.html'">KEMBALI</button>
+		</div>
+		<div id="status"></div>
+		<div id="loadingMessage" hidden="">⌛ Loading video...</div>
+	</div>
+	<script>
+		var validation = '';
+		var video = document.createElement("video");
+		var canvasElement = document.getElementById("canvas");
+		var canvas = canvasElement.getContext("2d");
+		var loadingMessage = document.getElementById("loadingMessage");
+
+		function drawLine(begin, end, color) {
+			canvas.beginPath();
+			canvas.moveTo(begin.x, begin.y);
+			canvas.lineTo(end.x, end.y);
+			canvas.lineWidth = 4;
+			canvas.strokeStyle = color;
+			canvas.stroke();
+		}
+
+		function setDataToDevice(key, data) 
+		{
+			if(typeof Android !== "undefined" && Android !== null) 
+			{
+				Android.setDataToDevice(key, data);
+			} 
+		}
+		function getDataFromDevice(key) 
+		{
+			if(typeof Android !== "undefined" && Android !== null) 
+			{
+				return Android.getDataFromDevice(key);
+			} 
+			return null;
+		}
+		navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function (stream) {
+			video.srcObject = stream;
+			video.setAttribute("playsinline", true); 
+			video.play();
+			requestAnimationFrame(tick);
+		});
+
+		console.log('DATA TO DEVICE');
+		setDataToDevice('A', 'COBA SAJA YA'); 
+		console.log('DATA FROM DEVICE', getDataFromDevice('A'));
+
+		function tick() {
+			loadingMessage.innerText = "⌛ Loading video..."
+			if (video.readyState === video.HAVE_ENOUGH_DATA) {
+				loadingMessage.hidden = true;
+				canvasElement.hidden = false;
+
+				canvasElement.height = video.videoHeight;
+				canvasElement.width = video.videoWidth;
+
+				canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+				var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+				var h = 280 * imageData.height / imageData.width;
+				document.querySelector('.canvas-wrapper').style.height=h+'px';
+
+				var code = jsQR(imageData.data, imageData.width, imageData.height, {
+					inversionAttempts: "dontInvert",
+				});
+				if (code) {
+					drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+					drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+					drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+					drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+					
+					console.log(code.data);			
+
+				}
+				else {
+				}
+			}
+			requestAnimationFrame(tick);
+		}
+		function parseTLV(data, tg, len, base) {
+			var start = 0;
+			var stop = 0;
+			var tag = '';
+			var lg = '';
+			var length = 0;
+			var i;
+			var value = '';
+			var j = 0;
+			var result = {};
+			for (i = 0; i < data.length; j++) {
+				start = i;
+				stop = start + tg;
+				tag = data.substring(start, stop);
+				start = stop;
+				stop = start + len;
+
+				lg = data.substring(start, stop);
+				length = parseInt(lg, base);
+				start = stop;
+				stop = start + length;
+				if (stop > data.length) {
+					stop = data.length;
+				}
+				value = data.substring(start, stop);
+				i = stop;
+				result[tag] = value;
+			}
+			return result;
+		}
+		var data = {
+			SC:"https",
+			SN:"ksps-trial.planetbiru.com",
+			SP:"443"
+		};
+	</script>
+</body>
+</html>
