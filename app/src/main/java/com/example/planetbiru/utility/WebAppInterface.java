@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Build;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -19,6 +18,7 @@ import com.example.planetbiru.stat.ConstantString;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.util.List;
@@ -63,8 +63,7 @@ public class WebAppInterface {
         String key = Config.getEncryptionKey();
         String decryptedData = util.decrypt(key, encryptedData);
         List<TLV> list = TLVUtils.builderTlvList(decryptedData);
-        for(int i = 0; i<list.size(); i++)
-        {
+        for(int i = 0; i<list.size(); i++) {
             String tag = list.get(i).getTag();
             String value = list.get(i).getValue();
             context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).edit().putString(tag, value).apply();
@@ -79,7 +78,6 @@ public class WebAppInterface {
             }
         }
 
-        // Set Home URL
         if(url.contains("://"))
         {
             context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).edit().putString(ConstantString.HOME_URL, url).apply();
@@ -89,17 +87,16 @@ public class WebAppInterface {
         {
             URL urlObj = new URL(url);
             String domain = urlObj.getHost();
-            if(domain.contains(":"))
-            {
+            if(domain.contains(":")) {
                 String arr[] = domain.split("\\:", 2);
                 domain = arr[0];
             }
             context.getSharedPreferences(ConstantString.CACHE_DATA, Context.MODE_PRIVATE).edit().putString(ConstantString.INTERNAL_HOST, domain).apply();
             Config.setInternalHosts(domain);
         }
-        catch (Exception e)
+        catch (MalformedURLException e)
         {
-
+            url = "";
         }
         return url;
     }
@@ -125,10 +122,10 @@ public class WebAppInterface {
     public void showToast(String toast) {
         Toast.makeText(this.context, toast, Toast.LENGTH_SHORT).show();
     }
+
     @JavascriptInterface
     public String getSMS()
     {
-        Log.d(TAG, "getSMS() ...");
         String sender = SMSCache.getSender();
         String message = SMSCache.getMessage();
         long time = SMSCache.getTime();
@@ -153,13 +150,13 @@ public class WebAppInterface {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @JavascriptInterface
-    public void getCalendar(String source)
+    public boolean getCalendar(String source)
     {
         JSONObject miscData = null;
         try {
             miscData = new JSONObject(source);
             JSONObject calendarData = new JSONObject(miscData.optString("data", "{}"));
-            this.addCalendar(
+            return this.addCalendar(
                     calendarData.optString("title", "Event"),
                     calendarData.optString("description", "Event"),
                     calendarData.optString("eventLocation", "Lokasi"),
@@ -170,8 +167,9 @@ public class WebAppInterface {
         }
         catch (JSONException e)
         {
-            e.printStackTrace();
+
         }
+        return false;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

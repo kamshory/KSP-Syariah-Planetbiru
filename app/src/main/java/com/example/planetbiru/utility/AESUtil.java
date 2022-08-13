@@ -80,8 +80,6 @@ public class AESUtil {
         byte[] ans = new byte[str.length() / 2];
         for (int i = 0; i < ans.length; i++) {
             int index = i * 2;
-
-            // Using parseInt() method of Integer class
             int val = Integer.parseInt(str.substring(index, index + 2), 16);
             ans[i] = (byte)val;
         }
@@ -90,8 +88,7 @@ public class AESUtil {
 
     private static String toHex(byte[] ba) {
         BigInteger n = new BigInteger(ba);
-        String hexa = n.toString(16);
-        return hexa;
+        return n.toString(16);
     }
 
     private byte[] doFinal(int mode, SecretKey secretKey, String iv, byte[] bytes) {
@@ -100,7 +97,6 @@ public class AESUtil {
             return cipher.doFinal(bytes);
         } catch (InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException
                 | InvalidKeyException e) {
-            Log.d(TAG, e.getMessage());
         }
         return null;
     }
