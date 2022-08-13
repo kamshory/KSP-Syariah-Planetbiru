@@ -170,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
             Config.setHomeURL(homeURL);
         }
 
-
         /*
          * Hide title bar
          */
@@ -287,6 +286,7 @@ public class MainActivity extends AppCompatActivity {
                 canvas.drawARGB(255, 0, 0, 0);
                 return bitmap;
             }
+
             // For 3.0+ Devices (Start)
             // onActivityResult attached before constructor
             protected void openFileChooser(ValueCallback uploadMsg, String acceptType) {
@@ -446,7 +446,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-
                 switch (error.getPrimaryError()) {
                     case SslError.SSL_UNTRUSTED:
                         Log.d(TAG, "SslError : The certificate authority is not trusted.");
@@ -479,28 +478,22 @@ public class MainActivity extends AppCompatActivity {
         };
 
         String savedURL = prefs.getString(ConstantString.LAST_URL_LOADED, null);
-        Log.d(TAG, "savedURL : "+savedURL);
         if (savedURL == null) {
             savedURL = "";
         }
-        Log.d(TAG, "savedURL : "+savedURL);
         if(!savedURL.startsWith("http"))
         {
             savedURL = "";
         }
-        Log.d(TAG, "savedURL : "+savedURL);
         if (savedURL.equals("")) {
             savedURL = Config.getHomeURL();
         }
-        Log.d(TAG, "savedURL : "+savedURL);
-        //savedURL= "";
         String url = this.getIntent().getStringExtra("url");
-        Log.d(TAG, "url : "+url);
 
         if(url == null || !url.contains("http") || !url.contains(":/")) {
             url = "";
         }
-        Log.d(TAG, url);
+
         if(savedInstanceState == null) {
             if (url.equals("")) {
                 if(!savedURL.equals("")) {
@@ -540,7 +533,6 @@ public class MainActivity extends AppCompatActivity {
                 PlanetService.endForeground();
             }
         }
-
     }
 
     public void windowLocation(String url)
@@ -556,11 +548,9 @@ public class MainActivity extends AppCompatActivity {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
-                Log.i ("isMyServiceRunning?", true+"");
                 return true;
             }
         }
-        Log.i ("isMyServiceRunning?", false+"");
         return false;
     }
 
