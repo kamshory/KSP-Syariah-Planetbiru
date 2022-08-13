@@ -206,7 +206,7 @@ public class WebAppInterface {
         intent.putExtra("endTime", endTime);
         intent.putExtra("title", title);
         intent.putExtra("description", description);
-        this.context.startActivity(intent);
+        this.activity.startActivity(intent);
         return true;
     }
 

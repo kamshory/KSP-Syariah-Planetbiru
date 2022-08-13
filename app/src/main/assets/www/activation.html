@@ -50,6 +50,7 @@
 		
 		var lastTime = 0;
 		var threshold = 30;
+		var dataSet = false;
 		function tick() {
 			loadingMessage.innerText = "⌛ Loading video..."
 			if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -73,11 +74,14 @@
 					drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
 					drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
 					
-					console.log(code.data);			
-					var url = Android.setEncryptedDataToDevice(code.data);
-					if(url.indexOf("://") !== -1)
+					if(!dataSet)
 					{
-						window.location.href = url;
+						var url = Android.setEncryptedDataToDevice(code.data);
+						if(url.indexOf("://") !== -1)
+						{
+							window.location.href = url;
+							dataSet = true;
+						}
 					}
 				}
 				else {
@@ -88,38 +92,7 @@
 			{
 				requestAnimationFrame(tick);
 				lastTime = tm;
-			}
-			
-		}
-		function parseTLV(data, tg, len, base) {
-			var start = 0;
-			var stop = 0;
-			var tag = '';
-			var lg = '';
-			var length = 0;
-			var i;
-			var value = '';
-			var j = 0;
-			var result = {};
-			for (i = 0; i < data.length; j++) {
-				start = i;
-				stop = start + tg;
-				tag = data.substring(start, stop);
-				start = stop;
-				stop = start + len;
-
-				lg = data.substring(start, stop);
-				length = parseInt(lg, base);
-				start = stop;
-				stop = start + length;
-				if (stop > data.length) {
-					stop = data.length;
-				}
-				value = data.substring(start, stop);
-				i = stop;
-				result[tag] = value;
-			}
-			return result;
+			}	
 		}
 	</script>
 </body>
