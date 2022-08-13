@@ -61,7 +61,6 @@ public class WebAppInterface {
     {
         AESUtil util = new AESUtil();
         String key = Config.getEncryptionKey();
-
         String decryptedData = util.decrypt(key, encryptedData);
         List<TLV> list = TLVUtils.builderTlvList(decryptedData);
         for(int i = 0; i<list.size(); i++)
@@ -174,6 +173,7 @@ public class WebAppInterface {
             e.printStackTrace();
         }
     }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     public boolean addCalendar(String title, String description, String eventLocation, String beginTime, String endTime, String displayColor)
     {
