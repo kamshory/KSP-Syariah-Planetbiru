@@ -1,3 +1,3 @@
-# AndroidGame
+# KSP Syariah Planetbiru
 
-Android application for children
+KSP Syariah Planetbiru adalah aplikasi Android untuk nasabah Koperasi Syariah Planetbiru. Aplikasi ini berjalan di atas sistem operasi Android.
